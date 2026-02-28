@@ -7,15 +7,20 @@ const {
   deleteRental,
 } = require("../controllers/rentals");
 
-const router = express.Router({ mergeParams: true });
 
-const { protect , authorize} = require("../middleware/auth");
+const router = express.Router({ mergeParams: true });//..
 
-router.route("/").get(protect, getRentals).post(protect , authorize('admin','user'), addRental);
+const { protect, authorize } = require("../middleware/auth");
+
+router
+  .route("/")
+  .get(protect, getRentals) // ดูรายการจอง (Logic แยก User/Admin จะอยู่ใน Controller) ไหม
+  .post(protect, authorize("user", "admin"), addRental); //การจองรถ
+
 router
   .route("/:id")
   .get(protect, getRental)
-  .put(protect , authorize('admin','user'),updateRental)
-  .delete(protect , authorize('admin','user'),deleteRental);
+  .put(protect, authorize("user", "admin"), updateRental) //แก้ไขการจอง
+  .delete(protect, authorize("user", "admin"), deleteRental); // ลบการจอง
 
 module.exports = router;
