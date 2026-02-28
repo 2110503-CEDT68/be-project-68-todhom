@@ -1,7 +1,7 @@
 const Provider = require("../models/Provider");
 const Rental = require("../models/Rental");
-//@desc Get all hospitals
-//@route GET /api/v1/hospitals
+//@desc Get all Providers
+//@route GET /api/v1/providers
 //@access Public
 exports.getProviders = async (req, res, next) => {
   let query;
@@ -22,7 +22,7 @@ exports.getProviders = async (req, res, next) => {
     /\b(gt|gte|lt|lte|in)\b/g,
     (match) => `$${match}`,
   );
-  query = Provider.find(JSON.parse(queryStr)).populate("appointments");
+  query = Provider.find(JSON.parse(queryStr)).populate("rentals");
 
   //Select Fields
   if (req.query.select) {
@@ -47,7 +47,7 @@ exports.getProviders = async (req, res, next) => {
     const total = await Provider.countDocuments();
     query = query.skip(startIndex).limit(limit);
     //Execute Query
-    const hospitals = await query;
+    const providers = await query;
 
     //Pagination result
     const pagination = {};
@@ -66,70 +66,70 @@ exports.getProviders = async (req, res, next) => {
     }
     res
       .status(200)
-      .json({ success: true, count: hospitals.length, data: hospitals });
+      .json({ success: true, count: providers.length, data: providers });
   } catch (err) {
     res.status(400).json({ success: false });
   }
 };
 
-//@desc Get single hospitals
-//@route GET /api/v1/hospitals/:id
+//@desc Get single Providers
+//@route GET /api/v1/providers/:id
 //@access Public
 exports.getProvider = async (req, res, next) => {
   try {
-    const hospital = await Provider.findById(req.params.id);
+    const provider = await Provider.findById(req.params.id);
 
-    if (!hospital) {
+    if (!provider) {
       return res.status(400).json({ success: false });
     }
 
-    res.status(200).json({ success: true, data: hospital });
+    res.status(200).json({ success: true, data: provider });
   } catch (err) {
     res.status(400).json({ success: false });
   }
 };
 
-//@desc Create all hospitals
-//@route POST /api/v1/hospitals
+//@desc Create all Providers
+//@route POST /api/v1/providers
 //@access Private
 exports.createProvider = async (req, res, next) => {
-  const hospital = await Provider.create(req.body);
-  res.status(201).json({ success: true, data: hospital });
+  const provider = await Provider.create(req.body);
+  res.status(201).json({ success: true, data: provider });
 };
 
-//@desc Update single hospitals
-//@route PUT /api/v1/hospitals/:id
+//@desc Update single Providers
+//@route PUT /api/v1/providers/:id
 //@access Private
 exports.updateProvider = async (req, res, next) => {
   try {
-    const hospital = await Provider.findByIdAndUpdate(req.params.id, req.body, {
+    const provider = await Provider.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
 
-    if (!hospital) {
+    if (!provider) {
       return res.status(400).json({ success: false });
     }
-    res.status(200).json({ success: true, data: hospital });
+    res.status(200).json({ success: true, data: provider });
   } catch (err) {
     res.status(400).json({ success: false });
   }
 };
 
-//@desc Delete single hospitals
-//@route DELETE /api/v1/hospitals/:id
+//@desc Delete single Providers
+//@route DELETE /api/v1/providers/:id
 //@access Private
 exports.deleteProvider = async (req, res, next) => {
   try {
-    const hospital = await Provider.findById(req.params.id);
+    const provider = await Provider.findById(req.params.id);
 
-    if (!hospital) {
+    if (!provider) {
       return res.status(400).json({
         success: false,
-        message: `Hospital not found with id of ${req.params.id}`,
+        message: `Provider not found with id of ${req.params.id}`,
       });
     }
-    await Rental.deleteMany({ hospital: req.params.id });
+    await Rental.deleteMany({ provider: req.params.id });
     await Provider.deleteOne({ _id: req.params.id });
     res.status(200).json({ success: true, data: {} });
   } catch (err) {

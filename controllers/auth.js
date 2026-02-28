@@ -5,14 +5,14 @@ const User = require("../models/User");
 //@access Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, telephone } = req.body;
 
     //Create User
     const user = await User.create({
       name,
       email,
       password,
-      role,
+      telephone,
     });
     //Create token
     //const token = user.getSignedJwtToken();
@@ -47,7 +47,7 @@ exports.login = async (req, res, next) => {
   const isMatch = await user.matchPassword(password);
 
   if (!isMatch) {
-    res.status(401).json({ success: false, msg: "Invalid credentials" });
+    return res.status(401).json({ success: false, msg: "Invalid credentials" });
   }
 
   //create token
