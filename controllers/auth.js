@@ -6,7 +6,6 @@ const User = require("../models/User");
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password, telephone } = req.body;
-
     //Create User
     const user = await User.create({
       name,
@@ -28,34 +27,46 @@ exports.register = async (req, res, next) => {
 //@route POST /api/v1/auth/login
 //@access Public
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  //Validate email & password
-  if (!email || !password) {
-    return res
-      .status(400)
-      .json({ success: false, msg: "Please provide an email and password" });
+    //Validate email & password
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Please provide an email and password" });
+    }
+
+    //check for user
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid credentials" });
+    }
+
+    //check if password matches
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, msg: "Invalid credentials" });
+    }
+
+    //create token
+    //const token = user.getSignedJwtToken();
+
+    //res.status(200).json({ success: true, token });
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      msg: "Cannot convert email or password to string",
+    });
   }
-
-  //check for user
-  const user = await User.findOne({ email }).select("+password");
-  if (!user) {
-    return res.status(400).json({ success: false, msg: "Invalid credentials" });
-  }
-
-  //check if password matches
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return res.status(401).json({ success: false, msg: "Invalid credentials" });
-  }
-
-  //create token
-  //const token = user.getSignedJwtToken();
-
-  //res.status(200).json({ success: true, token });
-  sendTokenResponse(user, 200, res);
 };
+
 //Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   //Create token
@@ -84,4 +95,19 @@ const sendTokenResponse = (user, statusCode, res) => {
 exports.getMe = async (req, res, next) => {
   const user = await User.findById(req.user.id);
   res.status(200).json({ success: true, data: user });
+};
+
+//@desc Log user out / clear cookie
+//@route GET /api/auth/logout
+//@access Private
+exports.logout = async (req, res, next) => {
+  res.cookie("token", "none", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
 };

@@ -8,23 +8,38 @@ exports.getRentals = async (req, res, next) => {
   let query;
   //General users can see only their appointments!
   if (req.user.role !== "admin") {
-    query = Rental.find({ user: req.user.id }).populate({
-      path: "provider",
-      select: "name address telephone",
-    });
+    query = Rental.find({ user: req.user.id })
+      .populate({
+        path: "provider",
+        select: "name address telephone",
+      })
+      .populate({
+        path: "user",
+        select: "name email telephone",
+      });
   } else {
     if (req.params.providerId) {
       console.log(req.params.providerId);
 
-      query = Rental.find({ provider: req.params.providerId }).populate({
-        path: "provider",
-        select: "name address telephone",
-      });
+      query = Rental.find({ provider: req.params.providerId })
+        .populate({
+          path: "provider",
+          select: "name address telephone",
+        })
+        .populate({
+          path: "user",
+          select: "name email telephone",
+        });
     } else
-      query = Rental.find().populate({
-        path: "provider",
-        select: "name address telephone",
-      });
+      query = Rental.find()
+        .populate({
+          path: "provider",
+          select: "name address telephone",
+        })
+        .populate({
+          path: "user",
+          select: "name email telephone",
+        });
   }
   try {
     const rentals = await query;
@@ -45,10 +60,15 @@ exports.getRentals = async (req, res, next) => {
 //@access PUBLIC
 exports.getRental = async (req, res, next) => {
   try {
-    const rental = await Rental.findById(req.params.id).populate({
-      path: "provider",
-      select: "name address telephone",
-    });
+    const rental = await Rental.findById(req.params.id)
+      .populate({
+        path: "provider",
+        select: "name address telephone",
+      })
+      .populate({
+        path: "user",
+        select: "name email telephone",
+      });
 
     if (!rental) {
       return res.status(404).json({
@@ -74,13 +94,13 @@ exports.getRental = async (req, res, next) => {
 //@access Private
 exports.addRental = async (req, res, next) => {
   try {
-    req.body.provider = req.params.providerId;
+    //req.body.provider = req.params.providerId;
 
-    const provider = await Provider.findById(req.params.providerId);
+    const provider = await Provider.findById(req.body.provider);
     if (!provider) {
       return res.status(404).json({
         success: false,
-        message: `No provider with the id of ${req.params.providerId}`,
+        message: `No provider with the id of ${req.body.provider}`,
       });
     }
     console.log(req.body);

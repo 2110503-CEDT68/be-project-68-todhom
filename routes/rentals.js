@@ -8,13 +8,13 @@ const {
 } = require("../controllers/rentals");
 
 
-const router = express.Router({ mergeParams: true });//..
+const router = express.Router({ mergeParams: true });
 
 const { protect, authorize } = require("../middleware/auth");
 
 router
   .route("/")
-  .get(protect, getRentals) // ดูรายการจอง (Logic แยก User/Admin จะอยู่ใน Controller) ไหม
+  .get(protect, getRentals) // ดูรายการจอง
   .post(protect, authorize("user", "admin"), addRental); //การจองรถ
 
 router
