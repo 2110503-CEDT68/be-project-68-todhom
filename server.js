@@ -2,6 +2,10 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
+const mongoSanitize = require("@exortek/express-mongo-sanitize");
+const helmet = require("helmet");
+const { xss } = require("express-xss-sanitizer");
+const hpp = require("hpp");
 
 //Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -17,6 +21,18 @@ app.set("query parser", "extended");
 //Body parser
 app.use(express.json());
 
+//Prevent http param pollutions
+app.use(hpp());
+
+//Prevent XSS attacks
+app.use(xss());
+
+//Set security headers
+app.use(helmet());
+
+//Sanitize data
+app.use(mongoSanitize());
+
 //Cookie parser
 app.use(cookieParser());
 
@@ -26,9 +42,9 @@ const auth = require("./routes/auth");
 const rentals = require("./routes/rentals");
 
 //Mount routers
-app.use("/api/v1/providers", providers);
-app.use("/api/v1/auth", auth);
-app.use("/api/v1/rentals", rentals);
+app.use("/api/providers", providers);
+app.use("/api/auth", auth);
+app.use("/api/rentals", rentals);
 
 const PORT = process.env.PORT || 5000;
 

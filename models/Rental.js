@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 
 const RentalSchema = new mongoose.Schema({
-  apptDate: {
+  rentalDate: {
     type: Date,
     required: true,
   },
   user: {
     type: mongoose.Schema.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
-  hospital: {
+  provider: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Hospital',
+    ref: "Provider",
     required: true,
   },
   createAt: {
@@ -20,4 +20,4 @@ const RentalSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-module.exports = mongoose.model("Appointment", RentalSchema);
+module.exports = mongoose.model("Rental", RentalSchema);
