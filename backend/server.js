@@ -6,6 +6,7 @@ const mongoSanitize = require("@exortek/express-mongo-sanitize");
 const helmet = require("helmet");
 const { xss } = require("express-xss-sanitizer");
 const hpp = require("hpp");
+const cors = require('cors');
 
 //Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -20,6 +21,12 @@ app.set("query parser", "extended");
 
 //Body parser
 app.use(express.json());
+
+//CORS
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true              
+}));
 
 //Prevent http param pollutions
 app.use(hpp());
